@@ -1,0 +1,52 @@
+public int SendAndRcv(byte[] send_buf, int intSize, ref byte[] rcv_buf)
+		{
+			byte[] array = new byte[3];
+			byte b = 0;
+			for (int i = 0; i < intSize - 1; i++)
+			{
+				b = (byte)(b + send_buf[i]);
+			}
+			b = (byte)(~b + 1);
+			send_buf[intSize - 1] = b;
+			if (PortType == 0)
+			{
+				ClearSendBuf();
+				ClearReceiveBuf();
+				if (Write(send_buf, intSize) != intSize)
+				{
+					return 1;
+				}
+				if (Read(ref array, 3) == 3)
+				{
+					if (array[0] != 11)
+					{
+						return 2;
+					}
+					int num = array[2];
+					if (Read(ref rcv_buf, num) != num)
+					{
+						return 3;
+					}
+					return 0;
+				}
+				return 4;
+			}
+			if (TcpSend(send_buf, intSize) != intSize)
+			{
+				return 1;
+			}
+			if (TcpReceive(ref array, 3) == 3)
+			{
+				if (array[0] != 11)
+				{
+					return 2;
+				}
+				int num = array[2];
+				if (TcpReceive(ref rcv_buf, num) != num)
+				{
+					return 3;
+				}
+				return 0;
+			}
+			return 4;
+		}
